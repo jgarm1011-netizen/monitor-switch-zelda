@@ -1,7 +1,7 @@
 import json
 import os
 import re
-import requests
+from curl_cffi import requests
 from bs4 import BeautifulSoup
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
@@ -18,6 +18,7 @@ TIENDAS = {
     "MediaMarkt": "https://www.mediamarkt.es/es/product/_consola-nintendo-switch-2-edicion-zelda-40-aniversario-79-full-hd-hdr-120-hz-256-gb-magnetic-joy-con-2-con-modo-raton-1674231.html?utm_source=google&utm_medium=v2-sho&utm_campaign=es%7Cmm%7Crt%7Cv2-sho%7Cpmax%7Cnsp%7CMEDIUM%7Cna%7Cd2c%7CNA%7CB0009TVU&utm_content=B0009TVU-TCID23908560920&gclsrc=aw.ds&gad_source=1&gad_campaignid=23944133454&gbraid=0AAAAADL_At-gVj_vGFJR-s9XA8rGskCPe&gclid=Cj0KCQiAzeXXBhCGARIsADO5-zE7wEr7m8HdlCEhin8hX1kTH9D6NOikwXpai_ssAPxJabJcM_hA4YsaAvRvEALw_wcB",
     "El Corte Inglés": "https://www.elcorteingles.es/videojuegos/A202302815-nintendo-switch-2-edicion-zelda-40-aniversario/",
     "Fnac": "https://www.fnac.es/Consola-Nintendo-Switch-2-The-Legend-of-Zelda-40-Aniversario-Videoconsola/a13481099",
+    "Alcampo": "https://www.compraonline.alcampo.es/products/nintendo-switch-2-edici%C3%B3n-zelda-40-aniversario/435088"
     "Xtralife": "https://www.xtralife.com/producto/nintendo-switch-2-edicion-the-legend-of-zelda-40-aniversario-switch-2-edicion-especial/113185?srsltid=AYCX9vJJgJUiyG2hcCSQcRYVWvocSKEqw-ONwTrSFUuAHip9g1Lh30EVM1o",
     "Amazon España": "https://www.amazon.es/Nintendo-Switch-2-Legend-Zelda/dp/B0F2TN43GH",
 }
@@ -119,7 +120,7 @@ def revisar_tienda(nombre: str, url: str) -> tuple[bool, float | None]:
     if url.endswith("..."):
         return False, None
 
-    resp = requests.get(url, headers=HEADERS, timeout=20)
+    resp = requests.get(url, headers=HEADERS, impersonate="chrome", timeout=20)
     if resp.status_code != 200:
         print(f"[{nombre}] Bloqueo o error HTTP {resp.status_code}")
         return False, None
