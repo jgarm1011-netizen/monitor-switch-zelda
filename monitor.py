@@ -122,18 +122,13 @@ def revisar_tienda(nombre: str, url: str) -> tuple[bool, float | None]:
 
     # Primer intento como Chrome
     resp = requests.get(url, headers=HEADERS, impersonate="chrome", timeout=20)
-    
-    # Si da 403 (típico de MediaMarkt), reintenta como Safari
+
+    # Si da 403, reintenta como Safari antes de darlo por bloqueado
     if resp.status_code == 403:
         resp = requests.get(url, headers=HEADERS, impersonate="safari15_5", timeout=20)
 
     if resp.status_code != 200:
         print(f"[{nombre}] Bloqueado por cortafuegos (HTTP {resp.status_code}) - vigilar desde navegador")
-        return False, None
-
-    resp = requests.get(url, headers=HEADERS, impersonate="chrome", timeout=20)
-    if resp.status_code != 200:
-        print(f"[{nombre}] Bloqueo o error HTTP {resp.status_code}")
         return False, None
 
     soup = BeautifulSoup(resp.text, "html.parser")
