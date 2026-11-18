@@ -87,7 +87,7 @@ def limpiar_precio(valor) -> float | None:
 
 
 def analizar_json_ld(soup: BeautifulSoup) -> tuple[bool, float | None]:
-    """Busca metadatos estructurados Schema.org (usados por casi todas las tiendas)."""
+    """Busca metadatos estructurados Schema.org evitando precios históricos de catálogo."""
     scripts = soup.find_all("script", type="application/ld+json")
     for script in scripts:
         try:
@@ -107,9 +107,8 @@ def analizar_json_ld(soup: BeautifulSoup) -> tuple[bool, float | None]:
                 if not isinstance(offer, dict):
                     continue
                 avail = str(offer.get("availability", "")).lower()
-                precio = limpiar_precio(
-                    offer.get("price") or offer.get("lowPrice")
-                )
+                # Usamos solo "price" (evitamos "lowPrice", que Fnac deja fijado en 519,99 € aunque sea reventa)
+                precio = limpiar_precio(offer.get("price"))
                 if (
                     "instock" in avail
                     and precio is not None
@@ -135,6 +134,11 @@ def revisar_tienda(nombre: str, url: str) -> tuple[bool, float | None]:
         return False, None
 
     soup = BeautifulSoup(resp.text, "html.parser")
+    texto = soup.get_text(" ", strip=True).lower()
+
+    # Filtro anti-reventa para Fnac: si no la vende Fnac directamente, descartamos
+    if nombre == "Fnac" and "vendido por fnac" not in texto:
+        return False, None
 
     # 1. Comprobación fiable vía JSON-LD
     hay_stock, precio = analizar_json_ld(soup)
@@ -142,7 +146,6 @@ def revisar_tienda(nombre: str, url: str) -> tuple[bool, float | None]:
         return True, precio
 
     # 2. Comprobación alternativa en el texto visible de la página
-    texto = soup.get_text(" ", strip=True).lower()
     if any(p in texto for p in PALABRAS_AGOTADO):
         return False, None
 
