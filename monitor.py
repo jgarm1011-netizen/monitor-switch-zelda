@@ -37,10 +37,13 @@ PALABRAS_AGOTADO = [
     "agotado",
     "sin stock",
     "no disponible",
-    "temporalmente agotado", 
-    "provisionalmente agotado",
+    "temporalmente agotado",
     "avísame",
     "avisarme",
+    "alertarme",
+    "indisponible",
+    "ver disponibilidad en tienda",
+    "solo disponible en tienda",
     "out of stock",
 ]
 
